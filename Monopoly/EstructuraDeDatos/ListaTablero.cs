@@ -8,7 +8,7 @@ public class ListaTablero
         ColaNodo = null; //tail
     }
 
-    // Agrega Propiedad al final de la lista
+    // Agrega la Propiedad al final de la lista
     public void AgregarCasilla(Casilla casilla)
     {
         NodoTablero NuevaCasilla = new NodoTablero(casilla);
