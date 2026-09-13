@@ -1,10 +1,11 @@
 //Lista Doblemente Enlazada
-public class HistorialTransacciones
+//Esta lista esta consiste en el historial de Transacciones
+public class ListaTransacciones
 {
     public NodoTransaccion CabezaNodo { get; set; }
     public NodoTransaccion ColaNodo { get; set; }
 
-    public HistorialTransacciones()
+    public ListaTransacciones()
     {
         CabezaNodo = null;
         ColaNodo = null;
@@ -50,9 +51,9 @@ public class HistorialTransacciones
     }
 
     // Busca todas las transacciones donde el jugador participó (como origen o destino)
-    public HistorialTransacciones BuscarPorJugador(Jugador jugador)
+    public ListaTransacciones BuscarPorJugador(Jugador jugador)
     {
-        HistorialTransacciones resultado = new HistorialTransacciones();
+        ListaTransacciones resultado = new ListaTransacciones();
         NodoTransaccion actual = CabezaNodo;
         while (actual != null)
         {
@@ -66,9 +67,9 @@ public class HistorialTransacciones
 }
 
     // Busca todas las transacciones de un tipo específico
-    public HistorialTransacciones BuscarPorTipo(string tipo)
+    public ListaTransacciones BuscarPorTipo(string tipo)
     {
-        HistorialTransacciones resultado = new HistorialTransacciones();
+        ListaTransacciones resultado = new ListaTransacciones();
         NodoTransaccion actual = CabezaNodo;
         while (actual != null)
         {
