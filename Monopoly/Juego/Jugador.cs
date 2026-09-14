@@ -1,10 +1,12 @@
+using System.Security.Cryptography.X509Certificates;
+
 public class Jugador
 {
     public int Id { get; set; }
     public string Nombre { get; set; }
-    public int Saldo { get; set; }
+    public int Saldo { get; private set; }    
     public NodoTablero PosicionActual { get; set; }
-    public bool Activo { get; set; }
+    public bool Activo { get; private set; }
     public ListaPropiedad Propiedades { get; set; }
 
     public Jugador(int id, string nombre, int saldoInicial)
@@ -23,5 +25,19 @@ public class Jugador
         {
             PosicionActual = PosicionActual.Siguiente;
         }
+    }
+    public bool PagarDinero(int monto)
+    {
+        if (Saldo < monto)
+        {
+            return false;
+        }
+        Saldo -= monto;
+        return true;
+    }
+
+    public bool RecibirDinero(int monto)
+    {
+        Saldo += monto;
     }
 }
