@@ -1,0 +1,18 @@
+=== Historial de Transacciones ===
+
+N° Transacción: 1
+Turno: 1
+Tipo: GananciaEvento
+Origen: Banco
+Destino: Ana
+Monto: 5000
+Descripción: Ana ganó una carta de evento
+-----------------------------------
+N° Transacción: 2
+Turno: 2
+Tipo: PagoAlBanco
+Origen: Luis
+Destino: Banco
+Monto: 2000
+Descripción: Luis pagó una multa
+-----------------------------------

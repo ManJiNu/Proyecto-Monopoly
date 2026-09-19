@@ -36,7 +36,7 @@ public class Jugador
         return true;
     }
 
-    public bool RecibirDinero(int monto)
+    public void RecibirDinero(int monto)
     {
         Saldo += monto;
     }

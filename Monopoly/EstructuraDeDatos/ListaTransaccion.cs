@@ -1,3 +1,5 @@
+using System.IO;
+
 //Lista Doblemente Enlazada
 //Esta lista esta consiste en el historial de Transacciones
 public class ListaTransacciones
@@ -80,5 +82,45 @@ public class ListaTransacciones
             actual = actual.Siguiente;
         }
         return resultado;
-}
+    }
+
+
+    // Convierte el jugador a texto para el reporte: "Banco" si es null, o su nombre si existe
+    private string NombreParaReporte(Jugador jugador)
+    {
+        if (jugador == null)
+        {
+            return "Banco";
+        }
+        else
+        {
+            return jugador.Nombre;
+        }
+        
+    }
+    public void ExportarTXT(string rutaArchivo)
+    {
+        using (StreamWriter escritor = new StreamWriter(rutaArchivo))
+        {
+            escritor.WriteLine("=== Historial de Transacciones ===");
+            escritor.WriteLine();
+
+            NodoTransaccion actual = CabezaNodo;
+            while (actual != null)
+            {
+                Transaccion t = actual.TransaccionActual;
+
+                escritor.WriteLine($"N° Transacción: {t.Id}");
+                escritor.WriteLine($"Turno: {t.NumeroTurno}");
+                escritor.WriteLine($"Tipo: {t.Tipo}");
+                escritor.WriteLine($"Origen: {NombreParaReporte(t.JugadorOrigen)}");
+                escritor.WriteLine($"Destino: {NombreParaReporte(t.JugadorDestino)}");
+                escritor.WriteLine($"Monto: {t.Monto}");
+                escritor.WriteLine($"Descripción: {t.Descripcion}");
+                escritor.WriteLine("-----------------------------------");
+
+                actual = actual.Siguiente;
+            }
+        }
+    }
 }
