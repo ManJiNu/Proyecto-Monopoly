@@ -13,13 +13,13 @@ public class CasillaEvento : Casilla
         {
             case 1:
                 int premio = 100;
-                jugador.Saldo += premio;
+                jugador.RecibirDinero(premio); // Saldo tiene "private set": se cambia con este método
                 Console.WriteLine($"{jugador.Nombre} tomó una carta de evento: ¡gana {premio}!");
                 break;
 
             case 2:
                 int multa = 50;
-                jugador.Saldo -= multa;
+                jugador.PagarDinero(multa); // ídem: no se puede hacer jugador.Saldo -= multa directo
                 Console.WriteLine($"{jugador.Nombre} tomó una carta de evento: paga una multa de {multa}.");
                 break;
 
