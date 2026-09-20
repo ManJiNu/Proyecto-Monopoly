@@ -1,30 +1,69 @@
 public class CasillaEvento : Casilla
 {
-    private static readonly Random aleatorio = new Random();
+    // El mazo se comparte entre todas las casillas de evento del tablero:
+    // se arma una sola vez (con AgregarCarta) y se le asigna a cada CasillaEvento
+    // cuando se construye el tablero.
+    public ColaCartas Mazo { get; set; }
 
     public CasillaEvento(int id, string nombre) : base(id, nombre) { }
 
     public override void EjecutarEfecto(Jugador jugador)
     {
-        // Se "toma una carta" del mazo de eventos: un número aleatorio decide el efecto
-        int carta = aleatorio.Next(1, 4); // genera 1, 2 o 3
-
-        switch (carta)
+        if (Mazo == null)
         {
-            case 1:
-                int premio = 100;
-                jugador.RecibirDinero(premio); // Saldo tiene "private set": se cambia con este método
-                Console.WriteLine($"{jugador.Nombre} tomó una carta de evento: ¡gana {premio}!");
+            Console.WriteLine($"{jugador.Nombre} cayó en una casilla de evento, pero el mazo de cartas aún no está asignado.");
+            return;
+        }
+
+        CartaEvento carta = Mazo.SacarCarta();
+        if (carta == null)
+        {
+            Console.WriteLine($"{jugador.Nombre} cayó en una casilla de evento, pero el mazo está vacío.");
+            return;
+        }
+
+        Console.WriteLine($"{jugador.Nombre} tomó la carta: \"{carta.Descripcion}\"");
+
+        switch (carta.Tipo)
+        {
+            case TipoCarta.RecibirDinero:
+                jugador.RecibirDinero(carta.Valor);
+                Console.WriteLine($"{jugador.Nombre} recibe {carta.Valor}.");
                 break;
 
-            case 2:
-                int multa = 50;
-                jugador.PagarDinero(multa); // ídem: no se puede hacer jugador.Saldo -= multa directo
-                Console.WriteLine($"{jugador.Nombre} tomó una carta de evento: paga una multa de {multa}.");
+            case TipoCarta.PagarDinero:
+                bool pagoExitoso = jugador.PagarDinero(carta.Valor);
+                if (pagoExitoso)
+                    Console.WriteLine($"{jugador.Nombre} paga {carta.Valor}.");
+                else
+                    Console.WriteLine($"{jugador.Nombre} no tiene suficiente dinero para pagar {carta.Valor}.");
                 break;
 
-            case 3:
-                Console.WriteLine($"{jugador.Nombre} tomó una carta de evento: no pasa nada.");
+            case TipoCarta.AvanzarPosiciones:
+                jugador.Mover(carta.Valor); // ya existe en Jugador.cs, avanza usando Siguiente
+                Console.WriteLine($"{jugador.Nombre} avanza {carta.Valor} casillas.");
+                break;
+
+            case TipoCarta.RetrocederPosiciones:
+                // Jugador.Mover solo avanza, así que retrocedemos manualmente
+                // usando el enlace Anterior del propio NodoTablero.
+                for (int i = 0; i < carta.Valor; i++)
+                {
+                    jugador.PosicionActual = jugador.PosicionActual.Anterior;
+                }
+                Console.WriteLine($"{jugador.Nombre} retrocede {carta.Valor} casillas.");
+                break;
+
+            case TipoCarta.PerderTurno:
+                jugador.DebePerderTurno = true; // ver nota: falta agregar esta propiedad a Jugador
+                Console.WriteLine($"{jugador.Nombre} pierde su próximo turno.");
+                break;
+
+            case TipoCarta.IrACasilla:
+                // Pendiente: para mover al jugador a una casilla específica por ID (carta.Valor)
+                // esta clase necesitaría una referencia al Tablero completo para poder buscarla,
+                // y hoy CasillaEvento solo conoce su propio ID/Nombre. Falta esa conexión.
+                Console.WriteLine($"{jugador.Nombre} debería ir a la casilla {carta.Valor}, pero falta conectar el Tablero a esta casilla.");
                 break;
         }
     }
