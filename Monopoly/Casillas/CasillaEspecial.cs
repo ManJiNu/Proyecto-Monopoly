@@ -14,7 +14,6 @@ public class CasillaEspecial : Casilla
                 break;
 
             case "Ir a la Cárcel":
-                jugador.Posicion = 6; // ID de la casilla "Cárcel" en el tablero (ajusta según tu tablero)
                 jugador.EstaEnCarcel = true;
                 Console.WriteLine($"{jugador.Nombre} fue enviado a la Cárcel.");
                 break;
