@@ -1,5 +1,5 @@
 //Lista Enlazada Simple Circular
-class ColaTurno
+public class ColaTurno
 {
     public NodoTurno CabezaNodo {get;set;}
     public NodoTurno ColaNodo {get;set;}
