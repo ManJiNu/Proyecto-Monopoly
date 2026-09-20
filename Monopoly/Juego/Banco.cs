@@ -43,7 +43,7 @@ public class Banco
             return false; // no le alcanza
         }
 
-        propiedad.AsignarPropietario(jugador);
+        propiedad.Propietario = jugador; // antes: propiedad.AsignarPropietario(jugador), método que no existía
         jugador.Propiedades.AgregarPropiedad(propiedad);
 
         RegistrarTransaccion(numeroTurno, "CompraPropiedad", jugador, null, propiedad.PrecioCompra,
