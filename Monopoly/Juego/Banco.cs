@@ -1,6 +1,6 @@
 public class Banco
 {
-    public ListaTransacciones Historial { get; private set; }
+    public ListaTransacciones Historial { get; private set; } //Lista del historial de transacciones
     private int contadorId; // para generar Id incremental de cada transacción
 
     public Banco()
@@ -9,7 +9,7 @@ public class Banco
         contadorId = 1;
     }
 
-    // Procesa el pago de alquiler: jugadorQuePaga hacia propietario
+    //Función que procesa el pago de alquiler: jugadorQuePaga hacia propietario
     public bool PagarAlquiler(Jugador jugadorQuePaga, Propiedad propiedad, int numeroTurno)
     {
         int monto = propiedad.Alquiler;
@@ -29,7 +29,7 @@ public class Banco
         return true;
     }
 
-    // Procesa la compra de una propiedad disponible
+    //Funcion que procesa la compra de una propiedad disponible
     public bool ComprarPropiedad(Jugador jugador, Propiedad propiedad, int numeroTurno)
     {
         if (propiedad.Propietario != null)
@@ -40,7 +40,7 @@ public class Banco
         bool pagoExitoso = jugador.PagarDinero(propiedad.PrecioCompra);
         if (!pagoExitoso)
         {
-            return false; // no le alcanza
+            return false; // no le alcanza el dinero
         }
 
         propiedad.AsignarPropietario(jugador);
@@ -52,7 +52,7 @@ public class Banco
         return true;
     }
 
-    // Pago genérico entre jugador y banco (o entre dos jugadores), usado por eventos
+    //Funcion con pago genérico entre jugador y banco (o entre dos jugadores), usado por eventos
     public bool ProcesarPago(Jugador origen, Jugador destino, int monto, string tipo, int numeroTurno, string descripcion)
     {
         if (origen != null)
@@ -73,6 +73,7 @@ public class Banco
         return true;
     }
 
+    // Metodo que registra la trasacciones en el historial
     private void RegistrarTransaccion(int numeroTurno, string tipo, Jugador origen, Jugador destino, int monto, string descripcion)
     {
         Transaccion t = new Transaccion(contadorId, numeroTurno, tipo, origen, destino, monto, descripcion);

@@ -1,17 +1,17 @@
-//Lista Enlazada Simple Circular
+//Cola(Queue)
 class ColaTurno
 {
-    public NodoTurno CabezaNodo {get;set;}
-    public NodoTurno ColaNodo {get;set;}
-    public NodoTurno TurnoActual {get;set;}
+    public NodoTurno CabezaNodo { get; private set; }
+    public NodoTurno ColaNodo { get; private set; }
+    public NodoTurno TurnoActual { get; private set; }
     public ColaTurno()
     {
         CabezaNodo = null; //head
-        ColaNodo = null; //cola
+        ColaNodo = null; //tail
         TurnoActual = CabezaNodo;
     }
 
-    // Agrega un nuevo jugador al final del turno
+    //Metodo Enqueue: agrega un nuevo jugador al final del turno
     public void AgregarJugador(Jugador jugador)
     {
         NodoTurno JugadorNuevo = new NodoTurno(jugador);

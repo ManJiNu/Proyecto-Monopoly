@@ -1,15 +1,16 @@
+//Cola(Queue)
 public class ColaCartas
 {
-    public NodoCarta CabezaNodo { get; set; }
-    public NodoCarta ColaNodo { get; set; }
+    public NodoCarta CabezaNodo { get; private set; } 
+    public NodoCarta ColaNodo { get; private set; }
 
     public ColaCartas()
     {
-        CabezaNodo = null;
-        ColaNodo = null;
+        CabezaNodo = null;  //Primer elemento
+        ColaNodo = null;    //Ultimo elemento
     }
 
-    // Agrega una carta al final (se usa al armar el mazo inicial)
+    // Metodo Enqueue: agrega una carta al final (se usa al armar el mazo inicial)
     public void AgregarCarta(CartaEvento carta)
     {
         NodoCarta nuevoNodo = new NodoCarta(carta);
@@ -27,7 +28,7 @@ public class ColaCartas
         }
     }
 
-    // Toma la carta del frente, la mueve al final, y la devuelve para usarla
+    //Metodo Dequeue: toma la carta del frente, la mueve al final, y la devuelve para usarla
     public CartaEvento SacarCarta()
     {
         if (CabezaNodo == null)

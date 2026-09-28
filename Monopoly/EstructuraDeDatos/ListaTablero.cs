@@ -1,14 +1,14 @@
 // Lista Circular Doblemente Enlazada
 public class ListaTablero
 {
-    public NodoTablero CabezaNodo { get; set; }
-    public NodoTablero ColaNodo { get; set; }
+    public NodoTablero CabezaNodo { get; private set; }
+    public NodoTablero ColaNodo { get; private set; }
     public ListaTablero(){
         CabezaNodo = null; //head
         ColaNodo = null; //tail
     }
 
-    // Agrega la Propiedad al final de la lista
+    //Metodo que agrega la Propiedad al final de la lista
     public void AgregarCasilla(Casilla casilla)
     {
         NodoTablero NuevaCasilla = new NodoTablero(casilla);

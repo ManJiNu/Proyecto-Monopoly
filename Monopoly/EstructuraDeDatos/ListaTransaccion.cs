@@ -1,19 +1,18 @@
-using System.IO;
+using System.IO; //Biblioteca para leer y escribir archivos y carpetas (txt)
 
 //Lista Doblemente Enlazada
-//Esta lista esta consiste en el historial de Transacciones
 public class ListaTransacciones
 {
-    public NodoTransaccion CabezaNodo { get; set; }
-    public NodoTransaccion ColaNodo { get; set; }
+    public NodoTransaccion CabezaNodo { get; private set; }
+    public NodoTransaccion ColaNodo { get; private set; }
 
     public ListaTransacciones()
     {
-        CabezaNodo = null;
-        ColaNodo = null;
+        CabezaNodo = null; //head
+        ColaNodo = null; //tail
     }
 
-    // Agregar una transacción nueva al final
+    //Metodo que agrega una transacción nueva al final de la lista
     public void AgregarTransaccion(Transaccion transaccion)
     {
         NodoTransaccion nuevoNodo = new NodoTransaccion(transaccion);
@@ -30,7 +29,7 @@ public class ListaTransacciones
         }
     }
 
-    // Imprime recorriendo desde la transacción más antigua hacia la más reciente
+    //Metodo que imprime recorriendo desde la transacción más antigua hacia la más reciente
     public void ImprimirDesdeAntigua()
     {
         NodoTransaccion actual = CabezaNodo;
@@ -41,7 +40,7 @@ public class ListaTransacciones
         }
     }
 
-    // Imprime recorriendo desde la transacción más reciente hacia la más antigua
+    //Metodo que imprime recorriendo desde la transacción más reciente hacia la más antigua
     public void ImprimirDesdeReciente()
     {
         NodoTransaccion actual = ColaNodo;
@@ -52,7 +51,7 @@ public class ListaTransacciones
         }
     }
 
-    // Busca todas las transacciones donde el jugador participó (como origen o destino)
+    //Metodo que busca todas las transacciones donde el jugador participó (como origen o destino)
     public ListaTransacciones BuscarPorJugador(Jugador jugador)
     {
         ListaTransacciones resultado = new ListaTransacciones();
@@ -68,7 +67,7 @@ public class ListaTransacciones
         return resultado;
 }
 
-    // Busca todas las transacciones de un tipo específico
+    //Metodo que busca todas las transacciones de un tipo específico
     public ListaTransacciones BuscarPorTipo(string tipo)
     {
         ListaTransacciones resultado = new ListaTransacciones();
@@ -85,7 +84,7 @@ public class ListaTransacciones
     }
 
 
-    // Convierte el jugador a texto para el reporte: "Banco" si es null, o su nombre si existe
+    //Esta función convierte el jugador a texto para el reporte: "Banco" si es null, o su nombre si existe
     private string NombreParaReporte(Jugador jugador)
     {
         if (jugador == null)
@@ -98,9 +97,11 @@ public class ListaTransacciones
         }
         
     }
+
+    //Función que imprime informacion de las transacciones en un txt
     public void ExportarTXT(string rutaArchivo)
     {
-        using (StreamWriter escritor = new StreamWriter(rutaArchivo))
+        using (StreamWriter escritor = new StreamWriter(rutaArchivo)) //StreamWriter permite escribir texto en archivos
         {
             escritor.WriteLine("=== Historial de Transacciones ===");
             escritor.WriteLine();
