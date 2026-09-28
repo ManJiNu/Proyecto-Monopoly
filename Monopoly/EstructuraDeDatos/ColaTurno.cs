@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 //Cola(Queue)
 class ColaTurno
+=======
+//Lista Enlazada Simple Circular
+public class ColaTurno
+>>>>>>> 41ad58188a6be1e81df3ab8e0c22626b9e8a70bb
 {
     public NodoTurno CabezaNodo { get; private set; }
     public NodoTurno ColaNodo { get; private set; }
