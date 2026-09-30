@@ -3,6 +3,7 @@ public class Propiedad : Casilla
     public int PrecioCompra { get; set; }
     public int Alquiler { get; set; }
     public Jugador Propietario { get; set; }
+    public string ColorGrupo { get; set; } = "#BDC3C7"; // color del grupo, lo usa la interfaz gráfica
 
     public Propiedad(int id, string nombre, int preciocompra, int alquiler, Jugador propietario)
         : base(id, nombre)
@@ -17,29 +18,20 @@ public class Propiedad : Casilla
         if (Propietario == null)
         {
             // Nadie la ha comprado todavía: se le ofrece al jugador
-            // (la compra en sí se resuelve afuera, por ejemplo en la clase Banco)
-            Console.WriteLine($"{Nombre} está disponible por {PrecioCompra}.");
+            // (la compra en sí se resuelve afuera, en la clase Juego)
+            System.Console.WriteLine($"{Nombre} está disponible por {PrecioCompra}.");
         }
         else if (Propietario == jugador)
         {
             // El jugador cayó en su propia propiedad: no paga nada
-            Console.WriteLine($"{jugador.Nombre} cayó en su propia propiedad ({Nombre}).");
+            System.Console.WriteLine($"{jugador.Nombre} cayó en su propia propiedad ({Nombre}).");
         }
         else
         {
-            // Es de otro jugador: debe pagar alquiler.
-            // Saldo tiene "private set" en Jugador, el cambio se hace con
-            // PagarDinero/RecibirDinero en vez de tocar jugador.Saldo directamente.
-            bool pagoExitoso = jugador.PagarDinero(Alquiler);
-            if (pagoExitoso)
-            {
-                Propietario.RecibirDinero(Alquiler);
-                Console.WriteLine($"{jugador.Nombre} pagó {Alquiler} de alquiler a {Propietario.Nombre} por {Nombre}.");
-            }
-            else
-            {
-                Console.WriteLine($"{jugador.Nombre} no tiene suficiente dinero para pagar el alquiler de {Nombre}.");
-            }
+            // Es de otro jugador: debe pagar alquiler, pero el cobro ya NO se
+            // hace aquí. Se queda pendiente hasta que el jugador acerque su
+            // tarjeta RFID (ver Juego.ResolverCasillaActual / RegistrarTag).
+            System.Console.WriteLine($"{jugador.Nombre} debe pagar {Alquiler} de alquiler a {Propietario.Nombre} por {Nombre}. Esperando tarjeta RFID...");
         }
     }
 }

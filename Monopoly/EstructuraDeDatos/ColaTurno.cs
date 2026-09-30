@@ -1,14 +1,13 @@
 //Lista Enlazada Simple Circular
 public class ColaTurno
 {
-    public NodoTurno CabezaNodo { get; private set; }
-    public NodoTurno ColaNodo { get; private set; }
-    public NodoTurno TurnoActual { get; private set; }
-
+    public NodoTurno CabezaNodo {get;set;}
+    public NodoTurno ColaNodo {get;set;}
+    public NodoTurno TurnoActual {get;set;}
     public ColaTurno()
     {
-        CabezaNodo = null;
-        ColaNodo = null;
+        CabezaNodo = null; //head
+        ColaNodo = null; //cola
         TurnoActual = CabezaNodo;
     }
 
@@ -16,7 +15,7 @@ public class ColaTurno
     public void AgregarJugador(Jugador jugador)
     {
         NodoTurno JugadorNuevo = new NodoTurno(jugador);
-        if (CabezaNodo == null)
+        if(CabezaNodo == null)
         {
             CabezaNodo = JugadorNuevo;
             ColaNodo = JugadorNuevo;
@@ -30,7 +29,6 @@ public class ColaTurno
             ColaNodo.Siguiente = CabezaNodo;
         }
     }
-
     public void AvanzarTurno()
     {
         TurnoActual = TurnoActual.Siguiente;

@@ -7,6 +7,7 @@ public class Jugador
     public bool Activo { get; private set; }
     public bool EstaEnCarcel { get; set; } // lo usa CasillaEspecial ("Ir a la Cárcel")
     public bool DebePerderTurno { get; set; } // lo usa CasillaEvento (carta TipoCarta.PerderTurno)
+    public string TagRFID { get; set; } // código de la tarjeta RFID que identifica a este jugador
     public ListaPropiedad Propiedades { get; set; }
 
     private Dado dado1;

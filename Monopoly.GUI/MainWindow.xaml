@@ -1,0 +1,120 @@
+<Window x:Class="Monopoly.GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Monopoly" Height="750" Width="1000"
+        WindowStartupLocation="CenterScreen"
+        MinHeight="600" MinWidth="880"
+        FontFamily="Segoe UI">
+    <Window.Resources>
+        <Style x:Key="BotonRedondeado" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="12,7"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.35"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.85"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Window.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0B3D2E" Offset="0"/>
+            <GradientStop Color="#1B5E20" Offset="1"/>
+        </LinearGradientBrush>
+    </Window.Background>
+
+    <Grid x:Name="TableroGrid" Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/><RowDefinition Height="*"/><RowDefinition Height="*"/>
+            <RowDefinition Height="*"/><RowDefinition Height="*"/><RowDefinition Height="*"/><RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Las 24 casillas se agregan alrededor de este panel central en código -->
+        <Border Grid.Row="1" Grid.Column="1" Grid.RowSpan="5" Grid.ColumnSpan="5"
+                Background="#FFFDF7" CornerRadius="16" Padding="18">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="25" ShadowDepth="5" Opacity="0.45" Color="Black"/>
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                    <TextBlock Text="MONOPOLY" FontSize="30" FontWeight="Bold" Foreground="#1A237E"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Proyecto de Estructuras de Datos" FontSize="11" Foreground="#7F8C8D"
+                               HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <StackPanel x:Name="PanelRegistro" Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10" HorizontalAlignment="Center">
+                    <TextBlock Text="Nombre:" VerticalAlignment="Center" Margin="0,0,6,0" FontWeight="SemiBold"/>
+                    <TextBox x:Name="TxtNombreJugador" Width="140" Margin="0,0,8,0" Padding="4" VerticalContentAlignment="Center"/>
+                    <Button x:Name="BtnAgregarJugador" Content="Agregar jugador" Style="{StaticResource BotonRedondeado}"
+                            Background="#34495E" Margin="0,0,8,0" Click="BtnAgregarJugador_Click"/>
+                    <Button x:Name="BtnIniciarPartida" Content="Iniciar partida" Style="{StaticResource BotonRedondeado}"
+                            Background="#27AE60" Click="BtnIniciarPartida_Click" IsEnabled="False"/>
+                </StackPanel>
+
+                <Border Grid.Row="2" Background="#ECF0F1" CornerRadius="8" Padding="8,5" Margin="0,0,0,10" HorizontalAlignment="Center">
+                    <TextBlock x:Name="TxtEstadoPartida" Text="Registrando jugadores (mínimo 2, máximo 4)..."
+                               FontWeight="Bold" Foreground="#2C3E50" HorizontalAlignment="Center"/>
+                </Border>
+
+                <Border Grid.Row="3" Background="White" CornerRadius="8" BorderBrush="#DDDDDD" BorderThickness="1" Margin="0,0,0,10" Padding="8" MaxHeight="110">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="PanelJugadores"/>
+                    </ScrollViewer>
+                </Border>
+
+                <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,0,0,10" HorizontalAlignment="Center">
+                    <Button x:Name="BtnLanzarDados" Content="Lanzar dados" Style="{StaticResource BotonRedondeado}"
+                            Background="#2980B9" Margin="0,0,10,0" Click="BtnLanzarDados_Click" IsEnabled="False"/>
+                    <Border Background="#F1C40F" CornerRadius="6" Padding="10,5" Margin="0,0,10,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="TxtDados" FontWeight="Bold" FontSize="13" Foreground="#2C3E50"/>
+                    </Border>
+                    <Button x:Name="BtnComprar" Content="Comprar" Style="{StaticResource BotonRedondeado}"
+                            Background="#16A085" Margin="0,0,6,0" Click="BtnComprar_Click" IsEnabled="False"/>
+                    <Button x:Name="BtnNoComprar" Content="No comprar" Style="{StaticResource BotonRedondeado}"
+                            Background="#95A5A6" Margin="0,0,10,0" Click="BtnNoComprar_Click" IsEnabled="False"/>
+                    <Button x:Name="BtnTerminarTurno" Content="Terminar turno" Style="{StaticResource BotonRedondeado}"
+                            Background="#E67E22" Margin="0,0,10,0" Click="BtnTerminarTurno_Click" IsEnabled="False"/>
+                    <Button x:Name="BtnExportar" Content="Exportar transacciones" Style="{StaticResource BotonRedondeado}"
+                            Background="#7F8C8D" Click="BtnExportar_Click"/>
+                </StackPanel>
+
+                <Border Grid.Row="5" Background="#2C3E50" CornerRadius="8" Padding="2">
+                    <TextBox x:Name="TxtLog" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
+                             TextWrapping="Wrap" FontFamily="Consolas" FontSize="11"
+                             Background="Transparent" Foreground="#ECF0F1" BorderThickness="0" Padding="8"/>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
