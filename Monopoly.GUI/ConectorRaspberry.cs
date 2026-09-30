@@ -21,10 +21,26 @@ namespace Monopoly.GUI
             servidor = new TcpListener(IPAddress.Any, puerto);
         }
 
-        public void Iniciar()
+        // Devuelve true si logro abrir el puerto. Si ya hay otra ventana de
+        // este mismo juego corriendo en la misma laptop (por ejemplo, al
+        // probar varios jugadores en red desde una sola maquina), el puerto
+        // ya esta tomado y devuelve false en vez de tumbar la aplicacion:
+        // esa ventana en particular simplemente no va a recibir el dado
+        // fisico ni el lector RFID (de todas formas esa laptop no tendria
+        // la Raspberry conectada en ese caso).
+        public bool Iniciar()
         {
-            servidor.Start();
+            try
+            {
+                servidor.Start();
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
+
             _ = Task.Run(EscucharConexiones);
+            return true;
         }
 
         private async Task EscucharConexiones()

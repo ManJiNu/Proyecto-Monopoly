@@ -48,7 +48,10 @@ namespace Monopoly.GUI
                     ActualizarInterfaz();
                 });
             };
-            conector.Iniciar();
+            if (!conector.Iniciar())
+            {
+                RegistrarMensaje("No se pudo abrir el puerto 5050 para la Raspberry Pi (probablemente ya hay otra ventana del juego abierta en esta laptop usandolo). Esta ventana funciona normal, solo que no va a recibir el dado fisico ni el lector RFID.");
+            }
         }
 
         private void RegistrarMensaje(string texto)
