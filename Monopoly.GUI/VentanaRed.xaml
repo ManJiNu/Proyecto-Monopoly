@@ -80,7 +80,9 @@
                     <TextBox x:Name="TxtPuerto" Width="60" Margin="0,0,8,0" Padding="4" Text="5000"/>
                     <TextBlock Text="Nombre:" VerticalAlignment="Center" Margin="0,0,6,0" FontWeight="SemiBold"/>
                     <TextBox x:Name="TxtNombre" Width="120" Margin="0,0,8,0" Padding="4"/>
-                    <Button Content="Conectar" Style="{StaticResource BotonRedondeado}" Background="#27AE60" Click="BtnConectar_Click"/>
+                    <Button Content="Conectar" Style="{StaticResource BotonRedondeado}" Background="#27AE60" Margin="0,0,8,0" Click="BtnConectar_Click"/>
+                    <Button x:Name="BtnIniciarPartidaRed" Content="Iniciar partida" Style="{StaticResource BotonRedondeado}"
+                            Background="#8E44AD" Click="BtnIniciarPartidaRed_Click" IsEnabled="False"/>
                 </StackPanel>
 
                 <Border Grid.Row="2" Background="#ECF0F1" CornerRadius="8" Padding="8,5" Margin="0,0,0,10" HorizontalAlignment="Center">

@@ -17,6 +17,10 @@ public static class Protocolo
     public const string TirarDadosForzado = "TIRAR_DADOS_FORZADO";
     public const string ConfirmarTag = "CONFIRMAR_TAG";
 
+    // Permite arrancar la partida con menos de 4 jugadores (minimo 2), en vez
+    // de esperar siempre a que se conecten los 4.
+    public const string IniciarPartida = "INICIAR_PARTIDA";
+
     public static string[] Separar(string mensaje)
     {
         return mensaje.Split('|');

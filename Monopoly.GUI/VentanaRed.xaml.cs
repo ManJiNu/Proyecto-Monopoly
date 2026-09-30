@@ -96,7 +96,10 @@ namespace Monopoly.GUI
                     _ = cliente.EnviarAsync($"CONFIRMAR_TAG|{tag}");
                 });
             };
-            conector.Iniciar();
+            if (!conector.Iniciar())
+            {
+                Log("No se pudo abrir el puerto 5050 para la Raspberry Pi (probablemente ya hay otra ventana del juego abierta en esta laptop usandolo). Esta ventana funciona normal, solo que no va a recibir el dado fisico ni el lector RFID.");
+            }
         }
 
         private void Log(string texto)
@@ -128,6 +131,7 @@ namespace Monopoly.GUI
                 PanelConexion.IsEnabled = false;
                 BtnActualizarEstado.IsEnabled = true;
                 BtnExportarRed.IsEnabled = true;
+                BtnIniciarPartidaRed.IsEnabled = true;
                 TxtEstadoPartida.Text = "Conectado. Esperando a los demás jugadores...";
             }
             catch (Exception ex)
@@ -143,6 +147,7 @@ namespace Monopoly.GUI
         private async void BtnNoComprar_Click(object sender, RoutedEventArgs e) => await cliente.EnviarAsync("NO_COMPRAR");
         private async void BtnTerminarTurno_Click(object sender, RoutedEventArgs e) => await cliente.EnviarAsync("TERMINAR_TURNO");
         private async void BtnActualizarEstado_Click(object sender, RoutedEventArgs e) => await cliente.EnviarAsync("CONSULTAR_ESTADO");
+        private async void BtnIniciarPartidaRed_Click(object sender, RoutedEventArgs e) => await cliente.EnviarAsync("INICIAR_PARTIDA");
 
         private async void BtnExportarRed_Click(object sender, RoutedEventArgs e)
         {
@@ -421,6 +426,7 @@ namespace Monopoly.GUI
 
                 case "PARTIDA_INICIADA":
                     partidaTerminada = false;
+                    BtnIniciarPartidaRed.IsEnabled = false;
                     Log($"¡La partida inició! Turno de {partes[3]}.");
                     _ = cliente.EnviarAsync("CONSULTAR_ESTADO");
                     break;
@@ -640,6 +646,7 @@ namespace Monopoly.GUI
             BtnComprarRed.IsEnabled = false;
             BtnNoComprarRed.IsEnabled = false;
             BtnTerminarTurnoRed.IsEnabled = false;
+            BtnIniciarPartidaRed.IsEnabled = false;
         }
 
         private void GuardarTransaccionesEnArchivo(string contenido)

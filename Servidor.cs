@@ -237,6 +237,7 @@ public sealed class Servidor
                 Protocolo.ComprarPropiedad => partida.ComprarPropiedad(jugador),
                 Protocolo.NoComprar => partida.NoComprar(jugador),
                 Protocolo.TerminarTurno => partida.TerminarTurno(jugador),
+                Protocolo.IniciarPartida => partida.IniciarPartida(jugador),
                 Protocolo.ConsultarEstado => CrearResultadoPrivado(partida.CrearBloqueEstado()),
                 Protocolo.ConsultarTransacciones => CrearResultadoPrivado(partida.CrearBloqueTransacciones()),
                 _ => CrearResultadoPrivado(Protocolo.Error("ACCION_DESCONOCIDA", accion))
@@ -294,6 +295,7 @@ public sealed class Servidor
             || accion == Protocolo.ComprarPropiedad
             || accion == Protocolo.NoComprar
             || accion == Protocolo.TerminarTurno
+            || accion == Protocolo.IniciarPartida
             || accion == Protocolo.ConsultarEstado
             || accion == Protocolo.ConsultarTransacciones
             || accion == Protocolo.ConfirmarTag;

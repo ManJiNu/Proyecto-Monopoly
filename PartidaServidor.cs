@@ -36,6 +36,10 @@ public sealed class PartidaServidor
     public bool Iniciada { get; private set; }
     public bool Terminada { get; private set; }
 
+    // Numero minimo de jugadores para poder arrancar la partida a mano
+    // (con IniciarPartida) sin esperar a que se conecten los 4.
+    public const int MinimoJugadores = 2;
+
     public PartidaServidor(
         ListaTablero tablero,
         int saldoInicial,
@@ -110,6 +114,49 @@ public sealed class PartidaServidor
                     resultado.AgregarBroadcast(MensajeTurnoActual());
                 }
             }
+        }
+
+        return resultado;
+    }
+
+    // Arranca la partida "a mano" con los jugadores que ya se conectaron
+    // (minimo 2), en vez de esperar siempre a que se conecten los 4. Sirve
+    // para pruebas o para partidas mas cortas; cualquier jugador ya
+    // registrado puede pedirlo.
+    public ResultadoAccionServidor IniciarPartida(Jugador jugador)
+    {
+        ResultadoAccionServidor resultado = new ResultadoAccionServidor();
+
+        if (Iniciada || Terminada)
+        {
+            resultado.RespuestaPrivada = Protocolo.Error("PARTIDA_EN_CURSO", "La partida ya inició o terminó");
+            return resultado;
+        }
+
+        if (JugadoresRegistrados < MinimoJugadores)
+        {
+            resultado.RespuestaPrivada = Protocolo.Error(
+                "FALTAN_JUGADORES",
+                $"Se necesitan al menos {MinimoJugadores} jugadores para iniciar (hay {JugadoresRegistrados})");
+            return resultado;
+        }
+
+        if (Tablero.CabezaNodo == null)
+        {
+            resultado.RespuestaPrivada = Protocolo.Error("TABLERO_NO_CONFIGURADO", "No existe un tablero cargado");
+            return resultado;
+        }
+
+        Iniciada = true;
+        dadosLanzadosEnTurno = false;
+        propiedadPendienteCompra = null;
+
+        Jugador? actual = JugadorActual();
+        if (actual != null)
+        {
+            resultado.AgregarBroadcast(
+                $"PARTIDA_INICIADA|{NumeroTurno}|{actual.Id}|{Protocolo.LimpiarTexto(actual.Nombre)}");
+            resultado.AgregarBroadcast(MensajeTurnoActual());
         }
 
         return resultado;
