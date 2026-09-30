@@ -1,4 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="Monopoly\Monopoly.csproj" />
+  </ItemGroup>
+
+  <!-- Este proyecto vive en la raíz del repo, así que su glob por defecto
+       (**/*.cs) también alcanzaba los archivos de Monopoly/ y Monopoly.GUI/,
+       duplicando esas clases en vez de solo tomarlas de la referencia de
+       proyecto de arriba. Se excluyen explícitamente esas carpetas. -->
+  <ItemGroup>
+    <Compile Remove="Monopoly\**\*.cs" />
+    <Compile Remove="Monopoly.GUI\**\*.cs" />
+    <EmbeddedResource Remove="Monopoly\**" />
+    <EmbeddedResource Remove="Monopoly.GUI\**" />
+    <None Remove="Monopoly\**" />
+    <None Remove="Monopoly.GUI\**" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>

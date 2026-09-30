@@ -10,7 +10,22 @@ public sealed class PartidaServidor
 
     private int siguienteIdJugador = 1;
     private bool dadosLanzadosEnTurno;
-    private Propiedad? propiedadPendienteCompra;
+    private Propiedad? propiedadPendienteCompra; // esperando decision SI/NO de comprar
+
+    // Compra ya decidida (SI), pero todavia no se cobra: se espera la tarjeta
+    // RFID del jugador actual para confirmar la operacion.
+    private bool esperandoConfirmacionCompra;
+    private Propiedad? propiedadEnConfirmacionCompra;
+    private Jugador? jugadorEnConfirmacionCompra;
+
+    // Alquiler pendiente de cobro: se espera la tarjeta RFID de quien debe
+    // pagar antes de mover el dinero.
+    private Propiedad? alquilerPendiente;
+    private Jugador? jugadorQuePagaAlquiler;
+
+    // Jugador recien registrado que todavia no tiene tarjeta RFID vinculada.
+    // La proxima tarjeta que se lea se asocia a el.
+    private Jugador? jugadorEsperandoTag;
 
     public Banco Banco { get; }
     public ListaTablero Tablero { get; }
@@ -66,10 +81,12 @@ public sealed class PartidaServidor
 
         Turnos.AgregarJugador(jugador);
         JugadoresRegistrados++;
+        jugadorEsperandoTag = jugador;
 
         resultado.JugadorRegistrado = jugador;
         resultado.RespuestaPrivada = $"CONECTADO|{jugador.Id}|{Protocolo.LimpiarTexto(jugador.Nombre)}|{jugador.Saldo}";
         resultado.AgregarBroadcast($"JUGADOR_CONECTADO|{jugador.Id}|{Protocolo.LimpiarTexto(jugador.Nombre)}|{JugadoresRegistrados}|4");
+        resultado.AgregarBroadcast($"ESPERANDO_TAG_VINCULACION|{jugador.Id}|{Protocolo.LimpiarTexto(jugador.Nombre)}");
 
         if (JugadoresRegistrados == 4)
         {
@@ -100,6 +117,30 @@ public sealed class PartidaServidor
 
     public ResultadoAccionServidor TirarDados(Jugador jugador)
     {
+        ResultadoAccionServidor resultado = ValidarTirada(jugador);
+        if (resultado.RespuestaPrivada != null)
+            return resultado;
+
+        int valor1 = dado1.Lanzar();
+        int valor2 = dado2.Lanzar();
+        return EjecutarTirada(jugador, valor1, valor2, resultado);
+    }
+
+    // Tirada forzada: la usa el dado fisico controlado por la Raspberry Pi
+    // (llega desde ConectorRaspberry en el cliente y se reenvia por red con
+    // TIRAR_DADOS_FORZADO). El servidor sigue siendo quien decide si la
+    // tirada es valida; solo cambia de donde vienen los valores de los dados.
+    public ResultadoAccionServidor TirarDadosForzado(Jugador jugador, int valor1, int valor2)
+    {
+        ResultadoAccionServidor resultado = ValidarTirada(jugador);
+        if (resultado.RespuestaPrivada != null)
+            return resultado;
+
+        return EjecutarTirada(jugador, valor1, valor2, resultado);
+    }
+
+    private ResultadoAccionServidor ValidarTirada(Jugador jugador)
+    {
         ResultadoAccionServidor resultado = ValidarAccionDeTurno(jugador);
         if (resultado.RespuestaPrivada != null)
             return resultado;
@@ -110,9 +151,9 @@ public sealed class PartidaServidor
             return resultado;
         }
 
-        if (propiedadPendienteCompra != null)
+        if (propiedadPendienteCompra != null || esperandoConfirmacionCompra || alquilerPendiente != null)
         {
-            resultado.RespuestaPrivada = Protocolo.Error("DECISION_PENDIENTE", "Debe resolver la compra pendiente");
+            resultado.RespuestaPrivada = Protocolo.Error("DECISION_PENDIENTE", "Debe resolver la compra o el pago pendiente (con la tarjeta RFID) antes de lanzar los dados");
             return resultado;
         }
 
@@ -122,8 +163,11 @@ public sealed class PartidaServidor
             return resultado;
         }
 
-        int valor1 = dado1.Lanzar();
-        int valor2 = dado2.Lanzar();
+        return resultado;
+    }
+
+    private ResultadoAccionServidor EjecutarTirada(Jugador jugador, int valor1, int valor2, ResultadoAccionServidor resultado)
+    {
         int suma = valor1 + valor2;
 
         dadosLanzadosEnTurno = true;
@@ -148,12 +192,15 @@ public sealed class PartidaServidor
         ResolverCasilla(jugador, casilla, resultado);
 
         // Si el jugador quedó eliminado, avanzamos el turno para no dejar la partida detenida.
-        if (!jugador.Activo && propiedadPendienteCompra == null)
+        if (!jugador.Activo && propiedadPendienteCompra == null && !esperandoConfirmacionCompra && alquilerPendiente == null)
             AvanzarTurno(resultado);
 
         return resultado;
     }
 
+    // Ya NO compra de una vez: el jugador dijo que SI quiere comprar, pero el
+    // cobro se completa hasta que se confirme con la tarjeta RFID (ver
+    // ConfirmarTag/ConfirmarCompraConTag mas abajo).
     public ResultadoAccionServidor ComprarPropiedad(Jugador jugador)
     {
         ResultadoAccionServidor resultado = ValidarAccionDeTurno(jugador);
@@ -186,18 +233,13 @@ public sealed class PartidaServidor
             return resultado;
         }
 
-        bool comprada = Banco.ComprarPropiedad(jugador, propiedad, NumeroTurno);
-        if (!comprada)
-        {
-            resultado.RespuestaPrivada = Protocolo.Error("COMPRA_RECHAZADA", "Banco rechazó la compra al revalidar la operación");
-            return resultado;
-        }
-
         propiedadPendienteCompra = null;
+        esperandoConfirmacionCompra = true;
+        propiedadEnConfirmacionCompra = propiedad;
+        jugadorEnConfirmacionCompra = jugador;
+
         resultado.AgregarBroadcast(
-            $"PROPIEDAD_COMPRADA|{jugador.Id}|{propiedad.ID}|{Protocolo.LimpiarTexto(propiedad.Nombre)}|{propiedad.PrecioCompra}|{jugador.Saldo}");
-        resultado.AgregarBroadcast(
-            $"TRANSACCION_GENERADA|CompraPropiedad|{jugador.Id}|BANCO|{propiedad.PrecioCompra}");
+            $"ESPERANDO_TAG_COMPRA|{jugador.Id}|{propiedad.ID}|{Protocolo.LimpiarTexto(propiedad.Nombre)}|{propiedad.PrecioCompra}");
 
         return resultado;
     }
@@ -235,6 +277,12 @@ public sealed class PartidaServidor
         if (propiedadPendienteCompra != null)
         {
             resultado.RespuestaPrivada = Protocolo.Error("DECISION_PENDIENTE", "Debe comprar o rechazar la propiedad antes de terminar el turno");
+            return resultado;
+        }
+
+        if (esperandoConfirmacionCompra || alquilerPendiente != null)
+        {
+            resultado.RespuestaPrivada = Protocolo.Error("PAGO_PENDIENTE", "Debe confirmar la compra o el pago del alquiler con la tarjeta RFID antes de terminar el turno");
             return resultado;
         }
 
@@ -320,6 +368,158 @@ public sealed class PartidaServidor
     public void ExportarHistorial(string rutaArchivo)
     {
         Banco.Historial.ExportarTXT(rutaArchivo);
+    }
+
+    // Punto de entrada unico para cualquier lectura del lector RFID que llega
+    // por red (CONFIRMAR_TAG). El orden de prioridad importa: primero
+    // vincular tarjetas nuevas, luego confirmar pagos pendientes.
+    public ResultadoAccionServidor ConfirmarTag(string tag)
+    {
+        ResultadoAccionServidor resultado = new ResultadoAccionServidor();
+
+        if (string.IsNullOrWhiteSpace(tag))
+        {
+            resultado.RespuestaPrivada = Protocolo.Error("FORMATO_INVALIDO", "La tarjeta no tiene un código válido");
+            return resultado;
+        }
+
+        string tagLimpio = tag.Trim();
+
+        // 1) Vincular la tarjeta a un jugador recien registrado que aun no tiene una.
+        if (jugadorEsperandoTag != null)
+        {
+            Jugador vinculado = jugadorEsperandoTag;
+            vinculado.TagRFID = tagLimpio;
+            jugadorEsperandoTag = null;
+            resultado.AgregarBroadcast($"TAG_VINCULADO|{vinculado.Id}|{Protocolo.LimpiarTexto(vinculado.Nombre)}");
+            return resultado;
+        }
+
+        // 2) Confirmar el pago de un alquiler pendiente.
+        if (alquilerPendiente != null && jugadorQuePagaAlquiler != null)
+        {
+            ConfirmarPagoDeAlquiler(tagLimpio, resultado);
+            return resultado;
+        }
+
+        // 3) Confirmar una compra pendiente.
+        if (esperandoConfirmacionCompra && propiedadEnConfirmacionCompra != null && jugadorEnConfirmacionCompra != null)
+        {
+            ConfirmarCompraConTag(tagLimpio, resultado);
+            return resultado;
+        }
+
+        // 4) No hay nada pendiente: solo identifica de quien es la tarjeta.
+        Jugador? dueno = BuscarJugadorPorTag(tagLimpio);
+        if (dueno != null)
+        {
+            resultado.RespuestaPrivada = $"TAG_RECONOCIDO|{dueno.Id}|{Protocolo.LimpiarTexto(dueno.Nombre)}|{dueno.Saldo}";
+        }
+        else
+        {
+            resultado.RespuestaPrivada = Protocolo.Error("TAG_DESCONOCIDO", "Tarjeta no reconocida");
+        }
+
+        return resultado;
+    }
+
+    private Jugador? BuscarJugadorPorTag(string tag)
+    {
+        NodoTurno? nodo = Turnos.CabezaNodo;
+        if (nodo == null)
+            return null;
+
+        NodoTurno? inicio = nodo;
+        do
+        {
+            Jugador jugadorDelNodo = nodo.JugadorDelTurno;
+            if (!string.IsNullOrEmpty(jugadorDelNodo.TagRFID) && jugadorDelNodo.TagRFID == tag)
+                return jugadorDelNodo;
+
+            nodo = nodo.Siguiente;
+        }
+        while (nodo != null && !ReferenceEquals(nodo, inicio));
+
+        return null;
+    }
+
+    // Si se acerca la tarjeta equivocada, se rechaza y se queda esperando la
+    // correcta (no se cobra nada ni se cancela el pago pendiente).
+    private void ConfirmarPagoDeAlquiler(string tag, ResultadoAccionServidor resultado)
+    {
+        Jugador jugador = jugadorQuePagaAlquiler!;
+        Propiedad propiedad = alquilerPendiente!;
+
+        if (jugador.TagRFID != tag)
+        {
+            resultado.RespuestaPrivada = MensajeTarjetaEquivocada(jugador, tag);
+            return;
+        }
+
+        Jugador? propietario = propiedad.Propietario;
+        bool pagado = Banco.PagarAlquiler(jugador, propiedad, NumeroTurno);
+
+        alquilerPendiente = null;
+        jugadorQuePagaAlquiler = null;
+
+        if (pagado)
+        {
+            resultado.AgregarBroadcast(
+                $"PAGO_ALQUILER|{jugador.Id}|{propietario?.Id ?? 0}|{propiedad.ID}|{propiedad.Alquiler}|{jugador.Saldo}");
+            resultado.AgregarBroadcast(
+                $"TRANSACCION_GENERADA|PagoAlquiler|{jugador.Id}|{propietario?.Id ?? 0}|{propiedad.Alquiler}");
+        }
+        else
+        {
+            jugador.Eliminar();
+            resultado.AgregarBroadcast(
+                $"JUGADOR_ELIMINADO|{jugador.Id}|{Protocolo.LimpiarTexto(jugador.Nombre)}|SALDO_INSUFICIENTE_ALQUILER");
+        }
+
+        if (!jugador.Activo && propiedadPendienteCompra == null && !esperandoConfirmacionCompra && alquilerPendiente == null)
+            AvanzarTurno(resultado);
+    }
+
+    private void ConfirmarCompraConTag(string tag, ResultadoAccionServidor resultado)
+    {
+        Jugador jugador = jugadorEnConfirmacionCompra!;
+        Propiedad propiedad = propiedadEnConfirmacionCompra!;
+
+        if (jugador.TagRFID != tag)
+        {
+            resultado.RespuestaPrivada = MensajeTarjetaEquivocada(jugador, tag);
+            return;
+        }
+
+        esperandoConfirmacionCompra = false;
+        propiedadEnConfirmacionCompra = null;
+        jugadorEnConfirmacionCompra = null;
+
+        if (propiedad.Propietario != null)
+        {
+            resultado.RespuestaPrivada = Protocolo.Error("PROPIEDAD_OCUPADA", "La propiedad ya tiene dueño");
+            return;
+        }
+
+        bool comprada = Banco.ComprarPropiedad(jugador, propiedad, NumeroTurno);
+        if (comprada)
+        {
+            resultado.AgregarBroadcast(
+                $"PROPIEDAD_COMPRADA|{jugador.Id}|{propiedad.ID}|{Protocolo.LimpiarTexto(propiedad.Nombre)}|{propiedad.PrecioCompra}|{jugador.Saldo}");
+            resultado.AgregarBroadcast(
+                $"TRANSACCION_GENERADA|CompraPropiedad|{jugador.Id}|BANCO|{propiedad.PrecioCompra}");
+        }
+        else
+        {
+            resultado.RespuestaPrivada = Protocolo.Error("SALDO_INSUFICIENTE", "No tiene suficiente dinero para comprar la propiedad");
+        }
+    }
+
+    private string MensajeTarjetaEquivocada(Jugador jugadorEsperado, string tagRecibido)
+    {
+        Jugador? quienEscaneo = BuscarJugadorPorTag(tagRecibido);
+        string nombreEscaneo = quienEscaneo != null ? quienEscaneo.Nombre : "una tarjeta no registrada";
+        return Protocolo.Error("TARJETA_INCORRECTA", $"Esa tarjeta no es de {jugadorEsperado.Nombre}. Se detectó {nombreEscaneo}. Acerca la tarjeta correcta.");
     }
 
     private ResultadoAccionServidor ValidarAccionDeTurno(Jugador jugador)
@@ -421,6 +621,9 @@ public sealed class PartidaServidor
         casilla.EjecutarEfecto(jugador);
     }
 
+    // Ya NO cobra de una vez: se arma la espera de la tarjeta RFID de quien
+    // debe pagar. El cobro se completa en ConfirmarTag/ConfirmarPagoDeAlquiler
+    // cuando llega el tag correcto.
     private void ResolverPropiedad(Jugador jugador, Propiedad propiedad, ResultadoAccionServidor resultado)
     {
         Jugador? propietario = propiedad.Propietario;
@@ -439,20 +642,10 @@ public sealed class PartidaServidor
             return;
         }
 
-        bool pagado = Banco.PagarAlquiler(jugador, propiedad, NumeroTurno);
-        if (pagado)
-        {
-            resultado.AgregarBroadcast(
-                $"PAGO_ALQUILER|{jugador.Id}|{propietario.Id}|{propiedad.ID}|{propiedad.Alquiler}|{jugador.Saldo}");
-            resultado.AgregarBroadcast(
-                $"TRANSACCION_GENERADA|PagoAlquiler|{jugador.Id}|{propietario.Id}|{propiedad.Alquiler}");
-        }
-        else
-        {
-            jugador.Eliminar();
-            resultado.AgregarBroadcast(
-                $"JUGADOR_ELIMINADO|{jugador.Id}|{Protocolo.LimpiarTexto(jugador.Nombre)}|SALDO_INSUFICIENTE_ALQUILER");
-        }
+        alquilerPendiente = propiedad;
+        jugadorQuePagaAlquiler = jugador;
+        resultado.AgregarBroadcast(
+            $"ESPERANDO_TAG_ALQUILER|{jugador.Id}|{propietario.Id}|{propiedad.ID}|{propiedad.Alquiler}");
     }
 
     private void ResolverEvento(Jugador jugador, CasillaEvento evento, ResultadoAccionServidor resultado)
@@ -569,6 +762,11 @@ public sealed class PartidaServidor
     private void AvanzarTurno(ResultadoAccionServidor resultado)
     {
         propiedadPendienteCompra = null;
+        esperandoConfirmacionCompra = false;
+        propiedadEnConfirmacionCompra = null;
+        jugadorEnConfirmacionCompra = null;
+        alquilerPendiente = null;
+        jugadorQuePagaAlquiler = null;
         dadosLanzadosEnTurno = false;
 
         if (NumeroTurno >= MaximoTurnos)

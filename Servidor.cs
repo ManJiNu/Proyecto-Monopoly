@@ -178,7 +178,10 @@ public sealed class Servidor
             return;
         }
 
-        if (partes.Length != 1)
+        // TIRAR_DADOS_FORZADO y CONFIRMAR_TAG llevan parametros (el valor que
+        // leyo la Raspberry, o la tarjeta escaneada); el resto no recibe nada.
+        bool llevaParametros = accion == Protocolo.TirarDadosForzado || accion == Protocolo.ConfirmarTag;
+        if (!llevaParametros && partes.Length != 1)
         {
             await conexion.EnviarAsync(Protocolo.Error("FORMATO_INVALIDO", $"{accion} no recibe parámetros"));
             return;
@@ -192,6 +195,38 @@ public sealed class Servidor
         }
 
         ResultadoAccionServidor resultado;
+
+        if (accion == Protocolo.TirarDadosForzado)
+        {
+            if (partes.Length != 3 || !int.TryParse(partes[1], out int valor1) || !int.TryParse(partes[2], out int valor2))
+            {
+                await conexion.EnviarAsync(Protocolo.Error("FORMATO_INVALIDO", "Use TIRAR_DADOS_FORZADO|valor1|valor2"));
+                return;
+            }
+
+            await candadoJuego.WaitAsync();
+            try { resultado = partida.TirarDadosForzado(jugador, valor1, valor2); }
+            finally { candadoJuego.Release(); }
+
+            await EnviarResultadoAsync(conexion, resultado);
+            return;
+        }
+
+        if (accion == Protocolo.ConfirmarTag)
+        {
+            if (partes.Length != 2 || string.IsNullOrWhiteSpace(partes[1]))
+            {
+                await conexion.EnviarAsync(Protocolo.Error("FORMATO_INVALIDO", "Use CONFIRMAR_TAG|tag"));
+                return;
+            }
+
+            await candadoJuego.WaitAsync();
+            try { resultado = partida.ConfirmarTag(partes[1].Trim()); }
+            finally { candadoJuego.Release(); }
+
+            await EnviarResultadoAsync(conexion, resultado);
+            return;
+        }
 
         await candadoJuego.WaitAsync();
         try
@@ -255,11 +290,13 @@ public sealed class Servidor
     private static bool EsComandoConocido(string accion)
     {
         return accion == Protocolo.TirarDados
+            || accion == Protocolo.TirarDadosForzado
             || accion == Protocolo.ComprarPropiedad
             || accion == Protocolo.NoComprar
             || accion == Protocolo.TerminarTurno
             || accion == Protocolo.ConsultarEstado
-            || accion == Protocolo.ConsultarTransacciones;
+            || accion == Protocolo.ConsultarTransacciones
+            || accion == Protocolo.ConfirmarTag;
     }
 
     private async Task EnviarResultadoAsync(ConexionCliente conexion, ResultadoAccionServidor resultado)

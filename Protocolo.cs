@@ -13,6 +13,10 @@ public static class Protocolo
     public const string ConsultarEstado = "CONSULTAR_ESTADO";
     public const string ConsultarTransacciones = "CONSULTAR_TRANSACCIONES";
 
+    // Comandos para el dado fisico y el lector RFID de la Raspberry Pi.
+    public const string TirarDadosForzado = "TIRAR_DADOS_FORZADO";
+    public const string ConfirmarTag = "CONFIRMAR_TAG";
+
     public static string[] Separar(string mensaje)
     {
         return mensaje.Split('|');
