@@ -59,6 +59,33 @@ public sealed class PartidaServidor
         Terminada = false;
         dadosLanzadosEnTurno = false;
         propiedadPendienteCompra = null;
+
+        ArmarMazoDeEventos();
+    }
+
+    // Igual que Juego.cs en modo local: arma un mazo basico y se lo asigna a
+    // TODAS las casillas de evento del tablero (comparten el mismo mazo).
+    // Sin esto, cada CasillaEvento.Mazo queda null y el servidor contesta
+    // EVENTO_SIN_MAZO en vez de aplicar una carta real.
+    private void ArmarMazoDeEventos()
+    {
+        ColaCartas mazo = new ColaCartas();
+        mazo.AgregarCarta(new CartaEvento(1, "Recibes 100 por un reembolso de impuestos", TipoCarta.RecibirDinero, 100));
+        mazo.AgregarCarta(new CartaEvento(2, "Pagas una multa de 50", TipoCarta.PagarDinero, 50));
+        mazo.AgregarCarta(new CartaEvento(3, "Avanzas 3 casillas", TipoCarta.AvanzarPosiciones, 3));
+        mazo.AgregarCarta(new CartaEvento(4, "Retrocedes 2 casillas", TipoCarta.RetrocederPosiciones, 2));
+        mazo.AgregarCarta(new CartaEvento(5, "Pierdes tu próximo turno", TipoCarta.PerderTurno, 0));
+        mazo.AgregarCarta(new CartaEvento(6, "Recibes 200 por un premio", TipoCarta.RecibirDinero, 200));
+
+        NodoTablero actual = Tablero.CabezaNodo;
+        do
+        {
+            if (actual.CasillaActual is CasillaEvento casillaEvento)
+            {
+                casillaEvento.Mazo = mazo;
+            }
+            actual = actual.Siguiente;
+        } while (actual != Tablero.CabezaNodo);
     }
 
     public ResultadoAccionServidor RegistrarJugador(string nombre)
@@ -179,11 +206,24 @@ public sealed class PartidaServidor
     // tirada es valida; solo cambia de donde vienen los valores de los dados.
     public ResultadoAccionServidor TirarDadosForzado(Jugador jugador, int valor1, int valor2)
     {
-        ResultadoAccionServidor resultado = ValidarTirada(jugador);
+        // El dado fisico es UN SOLO objeto compartido junto al tablero (conectado
+        // a una sola laptop), pero cualquiera lo puede presionar sin importar de
+        // quien sea esa laptop. Por eso esta tirada no se valida contra "jugador"
+        // (quien esta conectado en la laptop de la Raspberry), sino que siempre
+        // tira por el jugador al que le toca el turno en ese momento.
+        Jugador? jugadorDelTurno = JugadorActual();
+        if (jugadorDelTurno == null)
+        {
+            ResultadoAccionServidor sinTurno = new ResultadoAccionServidor();
+            sinTurno.RespuestaPrivada = Protocolo.Error("PARTIDA_NO_INICIADA", "La partida todavía no ha iniciado");
+            return sinTurno;
+        }
+
+        ResultadoAccionServidor resultado = ValidarTirada(jugadorDelTurno);
         if (resultado.RespuestaPrivada != null)
             return resultado;
 
-        return EjecutarTirada(jugador, valor1, valor2, resultado);
+        return EjecutarTirada(jugadorDelTurno, valor1, valor2, resultado);
     }
 
     private ResultadoAccionServidor ValidarTirada(Jugador jugador)
@@ -678,8 +718,14 @@ public sealed class PartidaServidor
         if (propietario == null)
         {
             propiedadPendienteCompra = propiedad;
-            resultado.AgregarRespuesta(
-                $"DECISION_COMPRA|{propiedad.ID}|{Protocolo.LimpiarTexto(propiedad.Nombre)}|{propiedad.PrecioCompra}|{propiedad.Alquiler}");
+            // Antes era un mensaje PRIVADO (solo volvia a quien mando la tirada).
+            // Eso fallaba cuando el dado fisico lo tira una laptop distinta a la
+            // del jugador al que le toca decidir (el dado es un objeto compartido).
+            // Por eso ahora es un BROADCAST con el id del jugador incluido: todas
+            // las ventanas lo reciben, pero los botones Comprar/No comprar solo se
+            // habilitan en la ventana de quien tiene el turno (ActualizarInterfazRed).
+            resultado.AgregarBroadcast(
+                $"DECISION_COMPRA|{jugador.Id}|{propiedad.ID}|{Protocolo.LimpiarTexto(propiedad.Nombre)}|{propiedad.PrecioCompra}|{propiedad.Alquiler}");
             return;
         }
 
