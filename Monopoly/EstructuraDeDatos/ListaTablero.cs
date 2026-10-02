@@ -37,32 +37,32 @@ public class ListaTablero
         ListaTablero tablero = new ListaTablero();
 
         tablero.AgregarCasilla(new CasillaEspecial(0, "Salida"));
-        tablero.AgregarCasilla(new Propiedad(1, "San José", 60, 10, null) { ColorGrupo = "#8B5E3C" });
-        tablero.AgregarCasilla(new Propiedad(2, "Cartago", 60, 10, null) { ColorGrupo = "#8B5E3C" });
+        tablero.AgregarCasilla(new Propiedad(1, "San José", 120, 25, null) { ColorGrupo = "#8B5E3C" });
+        tablero.AgregarCasilla(new Propiedad(2, "Cartago", 120, 25, null) { ColorGrupo = "#8B5E3C" });
         tablero.AgregarCasilla(new CasillaEvento(3, "Evento"));
-        tablero.AgregarCasilla(new Propiedad(4, "Heredia", 80, 12, null) { ColorGrupo = "#8EC9E0" });
-        tablero.AgregarCasilla(new Propiedad(5, "Alajuela", 80, 12, null) { ColorGrupo = "#8EC9E0" });
+        tablero.AgregarCasilla(new Propiedad(4, "Heredia", 160, 30, null) { ColorGrupo = "#8EC9E0" });
+        tablero.AgregarCasilla(new Propiedad(5, "Alajuela", 160, 30, null) { ColorGrupo = "#8EC9E0" });
 
         tablero.AgregarCasilla(new CasillaEspecial(6, "Cárcel (De visita)"));
-        tablero.AgregarCasilla(new Propiedad(7, "Escazú", 100, 15, null) { ColorGrupo = "#D9509A" });
-        tablero.AgregarCasilla(new Propiedad(8, "Santa Ana", 100, 15, null) { ColorGrupo = "#D9509A" });
+        tablero.AgregarCasilla(new Propiedad(7, "Escazú", 200, 38, null) { ColorGrupo = "#D9509A" });
+        tablero.AgregarCasilla(new Propiedad(8, "Santa Ana", 200, 38, null) { ColorGrupo = "#D9509A" });
         tablero.AgregarCasilla(new CasillaEvento(9, "Evento"));
-        tablero.AgregarCasilla(new Propiedad(10, "Liberia", 120, 18, null) { ColorGrupo = "#F2A03D" });
-        tablero.AgregarCasilla(new Propiedad(11, "Guanacaste", 120, 18, null) { ColorGrupo = "#F2A03D" });
+        tablero.AgregarCasilla(new Propiedad(10, "Liberia", 240, 45, null) { ColorGrupo = "#F2A03D" });
+        tablero.AgregarCasilla(new Propiedad(11, "Guanacaste", 240, 45, null) { ColorGrupo = "#F2A03D" });
 
         tablero.AgregarCasilla(new CasillaEspecial(12, "Parqueo Gratis"));
-        tablero.AgregarCasilla(new Propiedad(13, "Puntarenas", 140, 20, null) { ColorGrupo = "#E15241" });
-        tablero.AgregarCasilla(new Propiedad(14, "Jacó", 140, 20, null) { ColorGrupo = "#E15241" });
+        tablero.AgregarCasilla(new Propiedad(13, "Puntarenas", 280, 50, null) { ColorGrupo = "#E15241" });
+        tablero.AgregarCasilla(new Propiedad(14, "Jacó", 280, 50, null) { ColorGrupo = "#E15241" });
         tablero.AgregarCasilla(new CasillaEvento(15, "Evento"));
-        tablero.AgregarCasilla(new Propiedad(16, "Tamarindo", 160, 22, null) { ColorGrupo = "#F2E23D" });
-        tablero.AgregarCasilla(new Propiedad(17, "Monteverde", 160, 22, null) { ColorGrupo = "#F2E23D" });
+        tablero.AgregarCasilla(new Propiedad(16, "Tamarindo", 320, 55, null) { ColorGrupo = "#F2E23D" });
+        tablero.AgregarCasilla(new Propiedad(17, "Monteverde", 320, 55, null) { ColorGrupo = "#F2E23D" });
 
         tablero.AgregarCasilla(new CasillaEspecial(18, "Ir a la Cárcel"));
-        tablero.AgregarCasilla(new Propiedad(19, "Manuel Antonio", 180, 24, null) { ColorGrupo = "#3FA34D" });
-        tablero.AgregarCasilla(new Propiedad(20, "Turrialba", 180, 24, null) { ColorGrupo = "#3FA34D" });
+        tablero.AgregarCasilla(new Propiedad(19, "Manuel Antonio", 360, 60, null) { ColorGrupo = "#3FA34D" });
+        tablero.AgregarCasilla(new Propiedad(20, "Turrialba", 360, 60, null) { ColorGrupo = "#3FA34D" });
         tablero.AgregarCasilla(new CasillaEvento(21, "Evento"));
-        tablero.AgregarCasilla(new Propiedad(22, "La Fortuna", 200, 26, null) { ColorGrupo = "#2E5EAA" });
-        tablero.AgregarCasilla(new Propiedad(23, "Limón", 200, 26, null) { ColorGrupo = "#2E5EAA" });
+        tablero.AgregarCasilla(new Propiedad(22, "La Fortuna", 400, 65, null) { ColorGrupo = "#2E5EAA" });
+        tablero.AgregarCasilla(new Propiedad(23, "Limón", 400, 65, null) { ColorGrupo = "#2E5EAA" });
 
         return tablero;
     }

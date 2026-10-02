@@ -148,14 +148,27 @@ public sealed class Servidor
 
                 // Si estaba activo, se marca como eliminado y, si era su turno,
                 // se avanza solo para que la partida no quede trabada esperando
-                // una jugada que ya nadie puede hacer.
-                ResultadoAccionServidor resultadoDesconexion;
-                await candadoJuego.WaitAsync();
-                try { resultadoDesconexion = partida.ManejarDesconexion(jugador); }
-                finally { candadoJuego.Release(); }
+                // una jugada que ya nadie puede hacer. Todo envuelto en try/catch
+                // porque esto corre dentro de un "finally": si algo de adentro
+                // lanzara una excepcion sin atraparla aqui, se perderia en
+                // silencio (ni siquiera saldria en la consola del servidor).
+                try
+                {
+                    ResultadoAccionServidor resultadoDesconexion;
+                    await candadoJuego.WaitAsync();
+                    try { resultadoDesconexion = partida.ManejarDesconexion(jugador); }
+                    finally { candadoJuego.Release(); }
 
-                if (!string.IsNullOrEmpty(resultadoDesconexion.MensajeBroadcast))
-                    await BroadcastAsync(resultadoDesconexion.MensajeBroadcast);
+                    Console.WriteLine(
+                        $"ManejarDesconexion({jugador.Nombre}) -> MensajeBroadcast="{resultadoDesconexion.MensajeBroadcast}"");
+
+                    if (!string.IsNullOrEmpty(resultadoDesconexion.MensajeBroadcast))
+                        await BroadcastAsync(resultadoDesconexion.MensajeBroadcast);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error avanzando el turno tras la desconexion de {jugador.Nombre}: {ex}");
+                }
             }
         }
     }

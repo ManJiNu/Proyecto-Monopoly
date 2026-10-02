@@ -5,7 +5,7 @@ using System;
 // aplica lo que corresponda según la casilla donde caiga cada jugador.
 public class Juego
 {
-    public const int SaldoInicial = 1500;
+    public const int SaldoInicial = 1000;
     public const int MaximoJugadores = 4;
 
     public ListaTablero Tablero { get; private set; }

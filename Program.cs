@@ -9,7 +9,7 @@ ListaTablero tablero = ListaTablero.ConstruirTableroPredeterminado();
 
 Servidor servidor = new Servidor(
     puerto: puerto,
-    saldoInicial: 1500,   // mismo saldo inicial que usa Juego.cs y el tablero real (precios de 60 a 200)
+    saldoInicial: 1000,   // mismo saldo inicial que usa Juego.cs y el tablero real (precios de 120 a 400)
     premioPorInicio: 200, // mismo premio por pasar Salida que usa Juego.cs
     maximoTurnos: 100,
     tablero: tablero);
