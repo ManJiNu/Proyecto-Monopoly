@@ -160,7 +160,7 @@ public sealed class Servidor
                     finally { candadoJuego.Release(); }
 
                     Console.WriteLine(
-                        $"ManejarDesconexion({jugador.Nombre}) -> MensajeBroadcast="{resultadoDesconexion.MensajeBroadcast}"");
+                        $"ManejarDesconexion({jugador.Nombre}) -> MensajeBroadcast=\"{resultadoDesconexion.MensajeBroadcast}\"");
 
                     if (!string.IsNullOrEmpty(resultadoDesconexion.MensajeBroadcast))
                         await BroadcastAsync(resultadoDesconexion.MensajeBroadcast);
