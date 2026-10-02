@@ -145,6 +145,17 @@ public sealed class Servidor
                 Console.WriteLine($"Se desconectó {jugador.Nombre} (Id {jugador.Id}).");
                 await BroadcastAsync(
                     $"JUGADOR_DESCONECTADO|{jugador.Id}|{Protocolo.LimpiarTexto(jugador.Nombre)}");
+
+                // Si estaba activo, se marca como eliminado y, si era su turno,
+                // se avanza solo para que la partida no quede trabada esperando
+                // una jugada que ya nadie puede hacer.
+                ResultadoAccionServidor resultadoDesconexion;
+                await candadoJuego.WaitAsync();
+                try { resultadoDesconexion = partida.ManejarDesconexion(jugador); }
+                finally { candadoJuego.Release(); }
+
+                if (!string.IsNullOrEmpty(resultadoDesconexion.MensajeBroadcast))
+                    await BroadcastAsync(resultadoDesconexion.MensajeBroadcast);
             }
         }
     }

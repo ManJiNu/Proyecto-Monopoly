@@ -903,6 +903,14 @@ public sealed class PartidaServidor
                 continue;
             }
 
+            if (actual.EstaEnCarcel)
+            {
+                actual.EstaEnCarcel = false;
+                resultado.AgregarBroadcast(
+                    $"TURNO_SALTADO_CARCEL|{NumeroTurno}|{actual.Id}|{Protocolo.LimpiarTexto(actual.Nombre)}");
+                continue;
+            }
+
             resultado.AgregarBroadcast(MensajeTurnoActual());
             return;
         }
@@ -917,6 +925,53 @@ public sealed class PartidaServidor
         Terminada = true;
         Iniciada = false;
         resultado.AgregarBroadcast($"PARTIDA_TERMINADA|MAXIMO_TURNOS|{MaximoTurnos}");
+    }
+
+    // Se llama desde Servidor.cs cuando se cae la conexion de un jugador
+    // (cerro la ventana, se le fue el WiFi, etc.). Sin esto, si se desconecta
+    // justo en su propio turno, el juego queda trabado para siempre esperando
+    // una jugada que ya nadie puede hacer. Se trata igual que una eliminacion
+    // por insolvencia: se marca inactivo y, si era su turno, se avanza solo.
+    public ResultadoAccionServidor ManejarDesconexion(Jugador jugador)
+    {
+        ResultadoAccionServidor resultado = new ResultadoAccionServidor();
+
+        if (!jugador.Activo || Terminada || !Iniciada)
+            return resultado;
+
+        bool eraSuTurno = ReferenceEquals(JugadorActual(), jugador);
+
+        if (ReferenceEquals(jugadorQuePagaAlquiler, jugador))
+        {
+            alquilerPendiente = null;
+            jugadorQuePagaAlquiler = null;
+        }
+
+        if (ReferenceEquals(jugadorEnConfirmacionCompra, jugador))
+        {
+            esperandoConfirmacionCompra = false;
+            propiedadEnConfirmacionCompra = null;
+            jugadorEnConfirmacionCompra = null;
+        }
+
+        if (ReferenceEquals(jugadorEsperandoTag, jugador))
+        {
+            jugadorEsperandoTag = null;
+        }
+
+        if (eraSuTurno)
+        {
+            propiedadPendienteCompra = null;
+        }
+
+        jugador.Eliminar();
+        resultado.AgregarBroadcast(
+            $"JUGADOR_ELIMINADO|{jugador.Id}|{Protocolo.LimpiarTexto(jugador.Nombre)}|DESCONECTADO");
+
+        if (eraSuTurno)
+            AvanzarTurno(resultado);
+
+        return resultado;
     }
 
     private int CalcularPatrimonio(Jugador jugador)

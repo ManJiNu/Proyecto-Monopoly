@@ -577,6 +577,10 @@ namespace Monopoly.GUI
                     Log($"{partes[2]} perdió este turno.");
                     break;
 
+                case "TURNO_SALTADO_CARCEL":
+                    Log($"{partes[2]} está en la cárcel y pierde este turno.");
+                    break;
+
                 case "PARTIDA_TERMINADA":
                     partidaTerminada = true;
                     Log("¡La partida terminó! " + string.Join(" ", partes, 1, partes.Length - 1));
