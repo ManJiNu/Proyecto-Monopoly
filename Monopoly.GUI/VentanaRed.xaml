@@ -81,8 +81,6 @@
                     <TextBlock Text="Nombre:" VerticalAlignment="Center" Margin="0,0,6,0" FontWeight="SemiBold"/>
                     <TextBox x:Name="TxtNombre" Width="120" Margin="0,0,8,0" Padding="4"/>
                     <Button Content="Conectar" Style="{StaticResource BotonRedondeado}" Background="#27AE60" Margin="0,0,8,0" Click="BtnConectar_Click"/>
-                    <Button x:Name="BtnIniciarPartidaRed" Content="Iniciar partida" Style="{StaticResource BotonRedondeado}"
-                            Background="#8E44AD" Click="BtnIniciarPartidaRed_Click" IsEnabled="False"/>
                 </StackPanel>
 
                 <Border Grid.Row="2" Background="#ECF0F1" CornerRadius="8" Padding="8,5" Margin="0,0,0,10" HorizontalAlignment="Center">
@@ -97,6 +95,8 @@
                 </Border>
 
                 <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,0,0,10" HorizontalAlignment="Center">
+                    <Button x:Name="BtnIniciarPartidaRed" Content="Iniciar partida" Style="{StaticResource BotonRedondeado}"
+                            Background="#8E44AD" Margin="0,0,10,0" Click="BtnIniciarPartidaRed_Click" IsEnabled="False"/>
                     <Button x:Name="BtnLanzarDadosRed" Content="Lanzar dados" Style="{StaticResource BotonRedondeado}"
                             Background="#2980B9" Margin="0,0,10,0" Click="BtnLanzarDados_Click" IsEnabled="False"/>
                     <Button x:Name="BtnComprarRed" Content="Comprar" Style="{StaticResource BotonRedondeado}"
