@@ -142,7 +142,13 @@ namespace Monopoly.GUI
 
         // ---------------- Acciones (mandan comandos del protocolo) ----------------
 
-        private async void BtnLanzarDados_Click(object sender, RoutedEventArgs e) => await cliente.EnviarAsync("TIRAR_DADOS");
+        private void BtnLanzarDados_Click(object sender, RoutedEventArgs e)
+        {
+            // Ya no se tira el dado "digital" al dar clic: el numero que mueve
+            // al jugador siempre viene del dado fisico (Raspberry), que llega
+            // por conector.DadoRecibido y manda TIRAR_DADOS_FORZADO al servidor.
+            Log("Presiona el boton del dado fisico para tirar.");
+        }
         private async void BtnComprar_Click(object sender, RoutedEventArgs e) => await cliente.EnviarAsync("COMPRAR_PROPIEDAD");
         private async void BtnNoComprar_Click(object sender, RoutedEventArgs e) => await cliente.EnviarAsync("NO_COMPRAR");
         private async void BtnTerminarTurno_Click(object sender, RoutedEventArgs e) => await cliente.EnviarAsync("TERMINAR_TURNO");
@@ -463,9 +469,11 @@ namespace Monopoly.GUI
                 }
 
                 case "DECISION_COMPRA":
-                    // Mensaje privado: solo lo recibe quien tiene que decidir, o sea yo.
-                    propiedadPendienteId = int.Parse(partes[1]);
-                    Log($"¿Comprar {partes[2]} por {partes[3]}? (alquiler {partes[4]})");
+                    // Ahora es un broadcast (antes era privado): lo reciben todas las
+                    // ventanas, pero Comprar/No comprar solo se habilitan en la ventana
+                    // de quien tiene el turno (ver ActualizarInterfazRed, esMiTurno).
+                    propiedadPendienteId = int.Parse(partes[2]);
+                    Log($"¿Comprar {partes[3]} por {partes[4]}? (alquiler {partes[5]})");
                     break;
 
                 case "ESPERANDO_TAG_COMPRA":

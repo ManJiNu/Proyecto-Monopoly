@@ -252,9 +252,10 @@ namespace Monopoly.GUI
 
         private void BtnLanzarDados_Click(object sender, RoutedEventArgs e)
         {
-            try { juego.LanzarDados(); dadosLanzadosEnTurno = true; }
-            catch (InvalidOperationException ex) { MessageBox.Show(ex.Message); }
-            ActualizarInterfaz();
+            // Ya no se tira el dado "digital" al dar clic: el numero que mueve
+            // al jugador siempre viene del dado fisico (Raspberry), que llega
+            // por conector.DadoRecibido y llama a juego.LanzarDadosConValor(...).
+            RegistrarMensaje("Presiona el boton del dado fisico para tirar.");
         }
 
         private void BtnComprar_Click(object sender, RoutedEventArgs e)
